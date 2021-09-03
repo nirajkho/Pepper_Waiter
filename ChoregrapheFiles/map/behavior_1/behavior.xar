@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Compass Move To" id="3" localization="8" tooltip="Make the robot move to a configured point relative to its current location using camera to correct deviation.&#x0A;&#x0A;V1.1.0" x="974" y="34"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Output name="failure" type="1" type_size="1" nature="1" inner="0" tooltip="Triggered when the move fails (e.g. the robot falls)." id="5" /><Parameter name="Distance X (m)" inherits_from_parent="0" content_type="2" value="0.43" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot X axis." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot Y axis." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="Angle to travel around the robot Z axis." id="8" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Move To" id="2" localization="8" tooltip="Make the robot move to a configured point relative to its current location." x="532" y="110"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        try :
+            self.compass = ALProxy("ALVisualCompass")
+        except Exception as e:
+            self.compass = None
+            self.logger.error(e)
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        if self.compass:
+            self.compass.moveTo(0.0, 0.0, 0.0)
+
+    def onInput_onStart(self):
+        if self.compass:
+            self.compass.moveTo(self.getParameter("Distance X (m)"), self.getParameter("Distance Y (m)"), self.getParameter("Theta (rad)"))
+        # The move is finished so output
+        self.onStopped() #~ activate output of the box
+
+    def onInput_onStop(self):
+        self.onUnload()
+        self.failure()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished or stopped." id="4" /><Output name="failure" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" /><Parameter name="Distance X (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for forward/backward motion. Positive value&#x0A;means forward, negative value means backward." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for lateral motion. Positive value means left, negative&#x0A;value means right." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="The orientation in radians for final rotation. Positive value means anticlockwise,&#x0A;negative value means clockwise." id="8" /><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Fall Detector" id="3" localization="8" tooltip='Detect if the the robot has fallen and has activated the fall manager process. &#x0A;&#x0A;Note : The output &quot;robotHasFallen&quot; is stimulated 0.5s after the fall is detected to give the robot time to fall.' x="200" y="216"><bitmap>media/images/box/sensors/fall_manager.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bIsRunning = False
+
+    def onUnload(self):
+        self.bIsRunning = False
+
+    def onInput_onStart(self):
+        self.bIsRunning = True
+
+    def onInput_onStop(self):
+        if( self.bIsRunning ):
+            self.onUnload()
+            self.onStopped()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="memory_robotHasFallen" type="0" type_size="1" nature="4" stm_value_name="robotHasFallen" inner="1" tooltip="Connected to ALMemory. Will be stimulated every time the value subscribed to changes, respecting the refresh period." id="4" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is stopped." id="5" /><Output name="robotHasFallen" type="1" type_size="1" nature="2" inner="0" tooltip="This output is stimulated when the robot has fallen." id="6" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Wait" id="6" localization="8" tooltip="Wait a moment before sending a signal on the output. &#x0A;Can be stopped anytime. &#x0A;Stimulating the input again before output is activated restarts the waiting period.&#x0A;" x="206" y="93"><bitmap>media/images/box/wait.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.waiting = None
+
+    def onUnload(self):
+        self.cancelWaiting()
+
+    def triggerOutput(self):
+        self.timerOutput()
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.waiting and self.waiting.isRunning():
+            self.timerOutput()
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Wait box with the configured timeout value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" /><Output name="timerOutput" type="1" type_size="1" nature="1" inner="0" tooltip="Send a bang once time set in parameters is elapsed, or if the box is stopped." id="4" /><Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="0.5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="5" /><Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="If the box is currently waiting and cancelled, output will be stimulated." id="6" /></Box><Link inputowner="6" indexofinput="2" outputowner="0" indexofoutput="4" /><Link inputowner="0" indexofinput="6" outputowner="6" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="2" indexofoutput="4" /><Link inputowner="0" indexofinput="5" outputowner="2" indexofoutput="5" /><Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="2" indexofinput="3" outputowner="3" indexofoutput="6" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Compass Move To (1)" id="5" localization="8" tooltip="Make the robot move to a configured point relative to its current location using camera to correct deviation.&#x0A;&#x0A;V1.1.0" x="977" y="142"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Output name="failure" type="1" type_size="1" nature="1" inner="0" tooltip="Triggered when the move fails (e.g. the robot falls)." id="5" /><Parameter name="Distance X (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot X axis." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="0" content_type="2" value="0.59" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot Y axis." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="Angle to travel around the robot Z axis." id="8" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Move To" id="2" localization="8" tooltip="Make the robot move to a configured point relative to its current location." x="532" y="110"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        try :
+            self.compass = ALProxy("ALVisualCompass")
+        except Exception as e:
+            self.compass = None
+            self.logger.error(e)
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        if self.compass:
+            self.compass.moveTo(0.0, 0.0, 0.0)
+
+    def onInput_onStart(self):
+        if self.compass:
+            self.compass.moveTo(self.getParameter("Distance X (m)"), self.getParameter("Distance Y (m)"), self.getParameter("Theta (rad)"))
+        # The move is finished so output
+        self.onStopped() #~ activate output of the box
+
+    def onInput_onStop(self):
+        self.onUnload()
+        self.failure()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished or stopped." id="4" /><Output name="failure" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" /><Parameter name="Distance X (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for forward/backward motion. Positive value&#x0A;means forward, negative value means backward." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for lateral motion. Positive value means left, negative&#x0A;value means right." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="The orientation in radians for final rotation. Positive value means anticlockwise,&#x0A;negative value means clockwise." id="8" /><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Fall Detector" id="3" localization="8" tooltip='Detect if the the robot has fallen and has activated the fall manager process. &#x0A;&#x0A;Note : The output &quot;robotHasFallen&quot; is stimulated 0.5s after the fall is detected to give the robot time to fall.' x="200" y="216"><bitmap>media/images/box/sensors/fall_manager.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bIsRunning = False
+
+    def onUnload(self):
+        self.bIsRunning = False
+
+    def onInput_onStart(self):
+        self.bIsRunning = True
+
+    def onInput_onStop(self):
+        if( self.bIsRunning ):
+            self.onUnload()
+            self.onStopped()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="memory_robotHasFallen" type="0" type_size="1" nature="4" stm_value_name="robotHasFallen" inner="1" tooltip="Connected to ALMemory. Will be stimulated every time the value subscribed to changes, respecting the refresh period." id="4" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is stopped." id="5" /><Output name="robotHasFallen" type="1" type_size="1" nature="2" inner="0" tooltip="This output is stimulated when the robot has fallen." id="6" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Wait" id="6" localization="8" tooltip="Wait a moment before sending a signal on the output. &#x0A;Can be stopped anytime. &#x0A;Stimulating the input again before output is activated restarts the waiting period.&#x0A;" x="206" y="93"><bitmap>media/images/box/wait.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.waiting = None
+
+    def onUnload(self):
+        self.cancelWaiting()
+
+    def triggerOutput(self):
+        self.timerOutput()
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.waiting and self.waiting.isRunning():
+            self.timerOutput()
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Wait box with the configured timeout value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" /><Output name="timerOutput" type="1" type_size="1" nature="1" inner="0" tooltip="Send a bang once time set in parameters is elapsed, or if the box is stopped." id="4" /><Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="0.5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="5" /><Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="If the box is currently waiting and cancelled, output will be stimulated." id="6" /></Box><Link inputowner="6" indexofinput="2" outputowner="0" indexofoutput="4" /><Link inputowner="0" indexofinput="6" outputowner="6" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="2" indexofoutput="4" /><Link inputowner="0" indexofinput="5" outputowner="2" indexofoutput="5" /><Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="2" indexofinput="3" outputowner="3" indexofoutput="6" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Compass Move To (2)" id="8" localization="8" tooltip="Make the robot move to a configured point relative to its current location using camera to correct deviation.&#x0A;&#x0A;V1.1.0" x="977" y="241"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Output name="failure" type="1" type_size="1" nature="1" inner="0" tooltip="Triggered when the move fails (e.g. the robot falls)." id="5" /><Parameter name="Distance X (m)" inherits_from_parent="0" content_type="2" value="0.4" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot X axis." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="0" content_type="2" value="0.57" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot Y axis." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="Angle to travel around the robot Z axis." id="8" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Move To" id="2" localization="8" tooltip="Make the robot move to a configured point relative to its current location." x="532" y="110"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        try :
+            self.compass = ALProxy("ALVisualCompass")
+        except Exception as e:
+            self.compass = None
+            self.logger.error(e)
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        if self.compass:
+            self.compass.moveTo(0.0, 0.0, 0.0)
+
+    def onInput_onStart(self):
+        if self.compass:
+            self.compass.moveTo(self.getParameter("Distance X (m)"), self.getParameter("Distance Y (m)"), self.getParameter("Theta (rad)"))
+        # The move is finished so output
+        self.onStopped() #~ activate output of the box
+
+    def onInput_onStop(self):
+        self.onUnload()
+        self.failure()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished or stopped." id="4" /><Output name="failure" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" /><Parameter name="Distance X (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for forward/backward motion. Positive value&#x0A;means forward, negative value means backward." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for lateral motion. Positive value means left, negative&#x0A;value means right." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="The orientation in radians for final rotation. Positive value means anticlockwise,&#x0A;negative value means clockwise." id="8" /><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Fall Detector" id="3" localization="8" tooltip='Detect if the the robot has fallen and has activated the fall manager process. &#x0A;&#x0A;Note : The output &quot;robotHasFallen&quot; is stimulated 0.5s after the fall is detected to give the robot time to fall.' x="200" y="216"><bitmap>media/images/box/sensors/fall_manager.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bIsRunning = False
+
+    def onUnload(self):
+        self.bIsRunning = False
+
+    def onInput_onStart(self):
+        self.bIsRunning = True
+
+    def onInput_onStop(self):
+        if( self.bIsRunning ):
+            self.onUnload()
+            self.onStopped()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="memory_robotHasFallen" type="0" type_size="1" nature="4" stm_value_name="robotHasFallen" inner="1" tooltip="Connected to ALMemory. Will be stimulated every time the value subscribed to changes, respecting the refresh period." id="4" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is stopped." id="5" /><Output name="robotHasFallen" type="1" type_size="1" nature="2" inner="0" tooltip="This output is stimulated when the robot has fallen." id="6" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Wait" id="6" localization="8" tooltip="Wait a moment before sending a signal on the output. &#x0A;Can be stopped anytime. &#x0A;Stimulating the input again before output is activated restarts the waiting period.&#x0A;" x="206" y="93"><bitmap>media/images/box/wait.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.waiting = None
+
+    def onUnload(self):
+        self.cancelWaiting()
+
+    def triggerOutput(self):
+        self.timerOutput()
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.waiting and self.waiting.isRunning():
+            self.timerOutput()
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Wait box with the configured timeout value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" /><Output name="timerOutput" type="1" type_size="1" nature="1" inner="0" tooltip="Send a bang once time set in parameters is elapsed, or if the box is stopped." id="4" /><Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="0.5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="5" /><Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="If the box is currently waiting and cancelled, output will be stimulated." id="6" /></Box><Link inputowner="6" indexofinput="2" outputowner="0" indexofoutput="4" /><Link inputowner="0" indexofinput="6" outputowner="6" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="2" indexofoutput="4" /><Link inputowner="0" indexofinput="5" outputowner="2" indexofoutput="5" /><Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="2" indexofinput="3" outputowner="3" indexofoutput="6" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Compass Move To (3)" id="10" localization="8" tooltip="Make the robot move to a configured point relative to its current location using camera to correct deviation.&#x0A;&#x0A;V1.1.0" x="970" y="343"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Output name="failure" type="1" type_size="1" nature="1" inner="0" tooltip="Triggered when the move fails (e.g. the robot falls)." id="5" /><Parameter name="Distance X (m)" inherits_from_parent="0" content_type="2" value="-0.3" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot X axis." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="0" content_type="2" value="0.54" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot Y axis." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="Angle to travel around the robot Z axis." id="8" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Move To" id="2" localization="8" tooltip="Make the robot move to a configured point relative to its current location." x="532" y="110"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        try :
+            self.compass = ALProxy("ALVisualCompass")
+        except Exception as e:
+            self.compass = None
+            self.logger.error(e)
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        if self.compass:
+            self.compass.moveTo(0.0, 0.0, 0.0)
+
+    def onInput_onStart(self):
+        if self.compass:
+            self.compass.moveTo(self.getParameter("Distance X (m)"), self.getParameter("Distance Y (m)"), self.getParameter("Theta (rad)"))
+        # The move is finished so output
+        self.onStopped() #~ activate output of the box
+
+    def onInput_onStop(self):
+        self.onUnload()
+        self.failure()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished or stopped." id="4" /><Output name="failure" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" /><Parameter name="Distance X (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for forward/backward motion. Positive value&#x0A;means forward, negative value means backward." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for lateral motion. Positive value means left, negative&#x0A;value means right." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="The orientation in radians for final rotation. Positive value means anticlockwise,&#x0A;negative value means clockwise." id="8" /><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Fall Detector" id="3" localization="8" tooltip='Detect if the the robot has fallen and has activated the fall manager process. &#x0A;&#x0A;Note : The output &quot;robotHasFallen&quot; is stimulated 0.5s after the fall is detected to give the robot time to fall.' x="200" y="216"><bitmap>media/images/box/sensors/fall_manager.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bIsRunning = False
+
+    def onUnload(self):
+        self.bIsRunning = False
+
+    def onInput_onStart(self):
+        self.bIsRunning = True
+
+    def onInput_onStop(self):
+        if( self.bIsRunning ):
+            self.onUnload()
+            self.onStopped()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="memory_robotHasFallen" type="0" type_size="1" nature="4" stm_value_name="robotHasFallen" inner="1" tooltip="Connected to ALMemory. Will be stimulated every time the value subscribed to changes, respecting the refresh period." id="4" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is stopped." id="5" /><Output name="robotHasFallen" type="1" type_size="1" nature="2" inner="0" tooltip="This output is stimulated when the robot has fallen." id="6" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Wait" id="6" localization="8" tooltip="Wait a moment before sending a signal on the output. &#x0A;Can be stopped anytime. &#x0A;Stimulating the input again before output is activated restarts the waiting period.&#x0A;" x="206" y="93"><bitmap>media/images/box/wait.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.waiting = None
+
+    def onUnload(self):
+        self.cancelWaiting()
+
+    def triggerOutput(self):
+        self.timerOutput()
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.waiting and self.waiting.isRunning():
+            self.timerOutput()
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Wait box with the configured timeout value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" /><Output name="timerOutput" type="1" type_size="1" nature="1" inner="0" tooltip="Send a bang once time set in parameters is elapsed, or if the box is stopped." id="4" /><Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="0.5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="5" /><Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="If the box is currently waiting and cancelled, output will be stimulated." id="6" /></Box><Link inputowner="6" indexofinput="2" outputowner="0" indexofoutput="4" /><Link inputowner="0" indexofinput="6" outputowner="6" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="2" indexofoutput="4" /><Link inputowner="0" indexofinput="5" outputowner="2" indexofoutput="5" /><Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="2" indexofinput="3" outputowner="3" indexofoutput="6" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Compass Move To (4)" id="12" localization="8" tooltip="Make the robot move to a configured point relative to its current location using camera to correct deviation.&#x0A;&#x0A;V1.1.0" x="976" y="458"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Output name="failure" type="1" type_size="1" nature="1" inner="0" tooltip="Triggered when the move fails (e.g. the robot falls)." id="5" /><Parameter name="Distance X (m)" inherits_from_parent="0" content_type="2" value="-0.26" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot X axis." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="0" content_type="2" value="0.42" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot Y axis." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="Angle to travel around the robot Z axis." id="8" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Move To" id="2" localization="8" tooltip="Make the robot move to a configured point relative to its current location." x="532" y="110"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        try :
+            self.compass = ALProxy("ALVisualCompass")
+        except Exception as e:
+            self.compass = None
+            self.logger.error(e)
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        if self.compass:
+            self.compass.moveTo(0.0, 0.0, 0.0)
+
+    def onInput_onStart(self):
+        if self.compass:
+            self.compass.moveTo(self.getParameter("Distance X (m)"), self.getParameter("Distance Y (m)"), self.getParameter("Theta (rad)"))
+        # The move is finished so output
+        self.onStopped() #~ activate output of the box
+
+    def onInput_onStop(self):
+        self.onUnload()
+        self.failure()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished or stopped." id="4" /><Output name="failure" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" /><Parameter name="Distance X (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for forward/backward motion. Positive value&#x0A;means forward, negative value means backward." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for lateral motion. Positive value means left, negative&#x0A;value means right." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="The orientation in radians for final rotation. Positive value means anticlockwise,&#x0A;negative value means clockwise." id="8" /><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Fall Detector" id="3" localization="8" tooltip='Detect if the the robot has fallen and has activated the fall manager process. &#x0A;&#x0A;Note : The output &quot;robotHasFallen&quot; is stimulated 0.5s after the fall is detected to give the robot time to fall.' x="200" y="216"><bitmap>media/images/box/sensors/fall_manager.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bIsRunning = False
+
+    def onUnload(self):
+        self.bIsRunning = False
+
+    def onInput_onStart(self):
+        self.bIsRunning = True
+
+    def onInput_onStop(self):
+        if( self.bIsRunning ):
+            self.onUnload()
+            self.onStopped()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="memory_robotHasFallen" type="0" type_size="1" nature="4" stm_value_name="robotHasFallen" inner="1" tooltip="Connected to ALMemory. Will be stimulated every time the value subscribed to changes, respecting the refresh period." id="4" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is stopped." id="5" /><Output name="robotHasFallen" type="1" type_size="1" nature="2" inner="0" tooltip="This output is stimulated when the robot has fallen." id="6" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Wait" id="6" localization="8" tooltip="Wait a moment before sending a signal on the output. &#x0A;Can be stopped anytime. &#x0A;Stimulating the input again before output is activated restarts the waiting period.&#x0A;" x="206" y="93"><bitmap>media/images/box/wait.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.waiting = None
+
+    def onUnload(self):
+        self.cancelWaiting()
+
+    def triggerOutput(self):
+        self.timerOutput()
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.waiting and self.waiting.isRunning():
+            self.timerOutput()
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Wait box with the configured timeout value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" /><Output name="timerOutput" type="1" type_size="1" nature="1" inner="0" tooltip="Send a bang once time set in parameters is elapsed, or if the box is stopped." id="4" /><Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="0.5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="5" /><Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="If the box is currently waiting and cancelled, output will be stimulated." id="6" /></Box><Link inputowner="6" indexofinput="2" outputowner="0" indexofoutput="4" /><Link inputowner="0" indexofinput="6" outputowner="6" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="2" indexofoutput="4" /><Link inputowner="0" indexofinput="5" outputowner="2" indexofoutput="5" /><Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="2" indexofinput="3" outputowner="3" indexofoutput="6" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Compass Move To (5)" id="14" localization="8" tooltip="Make the robot move to a configured point relative to its current location using camera to correct deviation.&#x0A;&#x0A;V1.1.0" x="974" y="563"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Output name="failure" type="1" type_size="1" nature="1" inner="0" tooltip="Triggered when the move fails (e.g. the robot falls)." id="5" /><Parameter name="Distance X (m)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot X axis." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="0" content_type="2" value="0.06" default_value="0" min="-10" max="10" tooltip="Distance to travel along the robot Y axis." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="0" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="Angle to travel around the robot Z axis." id="8" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Move To" id="2" localization="8" tooltip="Make the robot move to a configured point relative to its current location." x="532" y="110"><bitmap>media/images/box/movement/walk_forward.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        try :
+            self.compass = ALProxy("ALVisualCompass")
+        except Exception as e:
+            self.compass = None
+            self.logger.error(e)
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        if self.compass:
+            self.compass.moveTo(0.0, 0.0, 0.0)
+
+    def onInput_onStart(self):
+        if self.compass:
+            self.compass.moveTo(self.getParameter("Distance X (m)"), self.getParameter("Distance Y (m)"), self.getParameter("Theta (rad)"))
+        # The move is finished so output
+        self.onStopped() #~ activate output of the box
+
+    def onInput_onStop(self):
+        self.onUnload()
+        self.failure()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished or stopped." id="4" /><Output name="failure" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" /><Parameter name="Distance X (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for forward/backward motion. Positive value&#x0A;means forward, negative value means backward." id="6" /><Parameter name="Distance Y (m)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-10" max="10" tooltip="The distance in meters for lateral motion. Positive value means left, negative&#x0A;value means right." id="7" /><Parameter name="Theta (rad)" inherits_from_parent="1" content_type="2" value="0" default_value="0" min="-3.14" max="3.14" tooltip="The orientation in radians for final rotation. Positive value means anticlockwise,&#x0A;negative value means clockwise." id="8" /><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Fall Detector" id="3" localization="8" tooltip='Detect if the the robot has fallen and has activated the fall manager process. &#x0A;&#x0A;Note : The output &quot;robotHasFallen&quot; is stimulated 0.5s after the fall is detected to give the robot time to fall.' x="200" y="216"><bitmap>media/images/box/sensors/fall_manager.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bIsRunning = False
+
+    def onUnload(self):
+        self.bIsRunning = False
+
+    def onInput_onStart(self):
+        self.bIsRunning = True
+
+    def onInput_onStop(self):
+        if( self.bIsRunning ):
+            self.onUnload()
+            self.onStopped()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="memory_robotHasFallen" type="0" type_size="1" nature="4" stm_value_name="robotHasFallen" inner="1" tooltip="Connected to ALMemory. Will be stimulated every time the value subscribed to changes, respecting the refresh period." id="4" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is stopped." id="5" /><Output name="robotHasFallen" type="1" type_size="1" nature="2" inner="0" tooltip="This output is stimulated when the robot has fallen." id="6" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Wait" id="6" localization="8" tooltip="Wait a moment before sending a signal on the output. &#x0A;Can be stopped anytime. &#x0A;Stimulating the input again before output is activated restarts the waiting period.&#x0A;" x="206" y="93"><bitmap>media/images/box/wait.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.waiting = None
+
+    def onUnload(self):
+        self.cancelWaiting()
+
+    def triggerOutput(self):
+        self.timerOutput()
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.waiting and self.waiting.isRunning():
+            self.timerOutput()
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Wait box with the configured timeout value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" /><Output name="timerOutput" type="1" type_size="1" nature="1" inner="0" tooltip="Send a bang once time set in parameters is elapsed, or if the box is stopped." id="4" /><Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="0.5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="5" /><Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="If the box is currently waiting and cancelled, output will be stimulated." id="6" /></Box><Link inputowner="6" indexofinput="2" outputowner="0" indexofoutput="4" /><Link inputowner="0" indexofinput="6" outputowner="6" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="0" indexofinput="4" outputowner="2" indexofoutput="4" /><Link inputowner="0" indexofinput="5" outputowner="2" indexofoutput="5" /><Link inputowner="3" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="2" indexofinput="3" outputowner="3" indexofoutput="6" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline><Resource name="Legs" type="Lock" timeout="0" /></Box><Box name="Switch Case" id="2" localization="8" tooltip="Test input value and stimulate the output matching to this value. If there is no&#x0A;matching output, the default output (onDefault) is stimulated.&#x0A;&#x0A;You can edit a case by left double-clicking on the line. You can add a&#x0A;case by right clicking on a line and selecting &apos;Insert a row&apos;. You can delete&#x0A;a case by right clicking on a line and selecting &apos;Remove a row&apos;." plugin="dispatcher_plugin" x="639" y="86"><bitmap>media/images/box/interaction/choice.png</bitmap><script language="4"><content><![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		try: # disable autoBind
+		  GeneratedClass.__init__(self, False)
+		except TypeError: # if NAOqi < 1.14
+		  GeneratedClass.__init__( self )
+
+	def onInput_onStart(self, p):
+		p = self.typeConversion(p)
+		if(p == self.typeConversion("africa")):
+			self.output_1(p)
+		elif(p == self.typeConversion("europe")):
+			self.output_2(p)
+		elif(p == self.typeConversion("asia")):
+			self.output_3(p)
+		elif(p == self.typeConversion("north america")):
+			self.output_4(p)
+		elif(p == self.typeConversion("south america")):
+			self.output_5(p)
+		elif(p == self.typeConversion("antartica")):
+			self.output_6(p)
+		else:
+			self.onDefault()
+
+	def typeConversion(self, p):
+		try:
+			p = float(p)
+			pint = int(p)
+			if( p == pint ):
+				p = pint
+		except:
+			p = str(p)
+		return p]]></content></script><pluginContent><keywords><keyword>&quot;africa&quot;</keyword><keyword>&quot;europe&quot;</keyword><keyword>&quot;asia&quot;</keyword><keyword>&quot;north america&quot;</keyword><keyword>&quot;south america&quot;</keyword><keyword>&quot;antartica&quot;</keyword><keyword></keyword></keywords></pluginContent><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="3" type_size="1" nature="1" inner="0" tooltip="Value to test." id="2" /><Output name="onDefault" type="1" type_size="1" nature="2" inner="0" tooltip="If the input value does not match any value set on the box." id="3" /><Output name="output_1" type="0" type_size="1" nature="2" inner="0" tooltip="This IO has been automatically added by box. Read box tooltip for more information." id="4" /><Output name="output_2" type="0" type_size="1" nature="2" inner="0" tooltip="This IO has been automatically added by box. Read box tooltip for more information." id="5" /><Output name="output_3" type="0" type_size="1" nature="2" inner="0" tooltip="This IO has been automatically added by box. Read box tooltip for more information." id="6" /><Output name="output_4" type="0" type_size="1" nature="2" inner="0" tooltip="This IO has been automatically added by box. Read box tooltip for more information." id="7" /><Output name="output_5" type="0" type_size="1" nature="2" inner="0" tooltip="This IO has been automatically added by box. Read box tooltip for more information." id="8" /><Output name="output_6" type="0" type_size="1" nature="2" inner="0" tooltip="This IO has been automatically added by box. Read box tooltip for more information." id="9" /></Box><Box name="Show Image" id="13" localization="8" tooltip="display an image on the screen&#x0A;&#x0A;V1.0.0&#x0A;" x="158" y="273"><bitmap>media/images/box/interaction/rec_movie.png</bitmap><script language="4"><content><![CDATA[
+
+class MyClass(GeneratedClass):
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        pass
+
+    def _getTabletService(self):
+        tabletService = None
+        try:
+            tabletService = self.session().service("ALTabletService")
+        except Exception as e:
+            self.logger.error(e)
+        return tabletService
+
+    def _getAbsoluteUrl(self, partial_url):
+        import os
+        subPath = os.path.join(self.packageUid(), os.path.normpath(partial_url).lstrip("\\/"))
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        return "http://%s/apps/%s" %(self._getTabletService().robotIp(), subPath.replace(os.path.sep, "/"))
+
+    def onInput_onStart(self):
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        if tabletService:
+            try:
+                url = self.getParameter("ImageUrl")
+                if url == '':
+                    self.logger.error("URL of the image is empty")
+                if not url.startswith('http'):
+                    url = self._getAbsoluteUrl(url)
+                tabletService.showImage(url)
+            except Exception as err:
+                self.logger.error("Error during ShowImage : %s " % err)
+                self.onStopped()
+        else:
+            self.logger.warning("No ALTabletService, can't display the image.")
+            self.onStopped()
+
+    def onInput_onHideImage(self):
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        if tabletService:
+            try:
+                tabletService.hideImage()
+            except Exception as err:
+                self.logger.error("Error during HideImage : %s " % err)
+                self.onStopped()
+        else:
+            self.logger.warning("No ALTabletService, can't hide the image.")
+            self.onStopped()
+
+    def onInput_onPreLoadImage(self):
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        if tabletService:
+            try:
+                partialUrl = self.getParameter("ImageUrl")
+                fullUrl = self._getAbsoluteUrl(partialUrl)
+                tabletService.preLoadImage(fullUrl)
+            except Exception as err:
+                self.logger.warning("Error during preLoadImage : %s " % err)
+                self.onStopped()
+        else:
+            self.logger.warning("No ALTabletService, can't preload the image.")
+            self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload()
+        self.onStopped()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="onHideImage" type="1" type_size="1" nature="1" inner="0" tooltip="Hide the image when a signal is received on this input." id="4" /><Input name="onPreLoadImage" type="1" type_size="1" nature="1" inner="0" tooltip="Preload the image when a signal is received on this input." id="5" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="6" /><Parameter name="ImageUrl" inherits_from_parent="0" content_type="3" value="" default_value="" custom_choice="0" tooltip='path of the image inside the &quot;html&quot; folder (e.g. &quot;/images/myimage.png&quot;' id="7" /></Box><Box name="Tablet Touch" id="6" localization="8" tooltip="Sends an event when the tablet is touched&#x0A;&#x0A;V1.0.1&#x0A;" x="371" y="318"><bitmap>media/images/box/sensors/STM.png</bitmap><script language="4"><content><![CDATA[
+
+class MyClass(GeneratedClass):
+
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        self.isRunning = False
+        self.tabletService = None
+        self.connectId = None
+
+    def onUnload(self):
+        if self.tabletService:
+            self.disconnectListener()
+            self.isRunning = False
+
+    def disconnectListener(self):
+        if self.connectId:
+            try:
+                self.tabletService.onTouch.disconnect(self.connectId)
+                self.connectId = None
+            except Exception as e:
+                self.logger.error(e)
+
+    def _getTabletService(self):
+        tabletService = None
+        try:
+            tabletService = self.session().service("ALTabletService")
+        except Exception as e:
+            self.logger.error(e)
+        return tabletService
+
+    def  onInput_onStart(self):
+        if self.isRunning:
+            return # already running, nothing to do
+        self.isRunning = True
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        self.tabletService = self._getTabletService()
+        if self.tabletService:
+            try:
+                if not self.connectId:
+                    if self.getParameter("Action") == "On touch move":
+                        self.connectId = self.tabletService.onTouchMove.connect(self.touchCallback)
+                    elif self.getParameter("Action") == "On touch down":
+                        self.connectId = self.tabletService.onTouchDown.connect(self.touchCallback)
+                    elif self.getParameter("Action") == "On touch up":
+                        self.connectId = self.tabletService.onTouchUp.connect(self.touchCallback)
+            except Exception as err:
+                self.logger.warning("Error during subscribe: %s " % err)
+        else:
+            self.logger.info("No ALTabletService, can't play listen for touch.")
+
+    def touchCallback(self, x, y):
+        self.onTouched([x, y])
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onTouched" type="0" type_size="1" nature="2" inner="0" tooltip="Send [x,y] position for one touch" id="4" /><Parameter name="Action" inherits_from_parent="0" content_type="3" value="On touch up" default_value="On touch move" custom_choice="0" tooltip="Type of touch you want on the tablet." id="5"><Choice value="On touch move" /><Choice value="On touch down" /><Choice value="On touch up" /></Parameter></Box><Box name="Switch Case (1)" id="7" localization="8" tooltip="Test input value and stimulate the output matching to this value. If there is no&#x0A;matching output, the default output (onDefault) is stimulated.&#x0A;&#x0A;You can edit a case by left double-clicking on the line. You can add a&#x0A;case by right clicking on a line and selecting &apos;Insert a row&apos;. You can delete&#x0A;a case by right clicking on a line and selecting &apos;Remove a row&apos;." plugin="dispatcher_plugin" x="548" y="357"><bitmap>media/images/box/interaction/choice.png</bitmap><script language="4"><content><![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		try: # disable autoBind
+		  GeneratedClass.__init__(self, False)
+		except TypeError: # if NAOqi < 1.14
+		  GeneratedClass.__init__( self )
+
+	def onInput_onStart(self, p):
+		p = self.typeConversion(p)
+		if(p == self.typeConversion("Hello")):
+			self.output_1(p)
+		elif(p == self.typeConversion(5)):
+			self.output_2(p)
+		else:
+			self.onDefault()
+
+	def typeConversion(self, p):
+		try:
+			p = float(p)
+			pint = int(p)
+			if( p == pint ):
+				p = pint
+		except:
+			p = str(p)
+		return p]]></content></script><pluginContent><keywords><keyword>&quot;Hello&quot;</keyword><keyword>5</keyword><keyword></keyword></keywords></pluginContent><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="1" inner="0" tooltip="Value to test." id="2" /><Output name="onDefault" type="1" type_size="1" nature="2" inner="0" tooltip="If the input value does not match any value set on the box." id="3" /><Output name="output_1" type="0" type_size="1" nature="2" inner="0" tooltip="This IO has been automatically added by box. Read box tooltip for more information." id="4" /><Output name="output_2" type="0" type_size="1" nature="2" inner="0" tooltip="This IO has been automatically added by box. Read box tooltip for more information." id="5" /></Box><Box name="WakeUp" id="1" localization="0" tooltip="Call a Wake Up process.&#x0A;Stiff all joints and apply stand Init posture if the robot is Stand" x="128" y="78"><bitmap>media/images/box/movement/stiffness.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.motion = ALProxy("ALMotion")
+        pass
+
+    def onUnload(self):
+        pass
+
+    def onInput_onStart(self):
+        self.motion.wakeUp()
+        self.onStopped() #~ activate output of the box
+        pass
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Resource name="All motors" type="Lock" timeout="0" /><Resource name="Stiffness" type="Lock" timeout="0" /></Box><Box name="Speech Reco." id="4" localization="8" tooltip="Recognize a word from a list of words set in the box parameters.&#x0A;&#x0A;V1.1.0&#x0A;" x="339" y="85"><bitmap>media/images/box/interaction/ear.png</bitmap><script language="4"><content><![CDATA[
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        try:
+            self.asr = ALProxy("ALSpeechRecognition")
+        except Exception as e:
+            self.asr = None
+            self.logger.error(e)
+        self.memory = ALProxy("ALMemory")
+
+    def onLoad(self):
+        from threading import Lock
+        self.bIsRunning = False
+        self.mutex = Lock()
+        self.hasPushed = False
+        self.hasSubscribed = False
+        self.BIND_PYTHON(self.getName(), "onWordRecognized")
+
+    def onUnload(self):
+        from threading import Lock
+        self.mutex.acquire()
+        try:
+            if (self.bIsRunning):
+                if (self.hasSubscribed):
+                    self.memory.unsubscribeToEvent("WordRecognized", self.getName())
+                if (self.hasPushed and self.asr):
+                    self.asr.popContexts()
+        except RuntimeError, e:
+            self.mutex.release()
+            raise e
+        self.bIsRunning = False;
+        self.mutex.release()
+
+    def onInput_onStart(self):
+        from threading import Lock
+        self.mutex.acquire()
+        if(self.bIsRunning):
+            self.mutex.release()
+            return
+        self.bIsRunning = True
+        try:
+            if self.asr:
+                self.asr.setVisualExpression(self.getParameter("Visual expression"))
+                self.asr.pushContexts()
+            self.hasPushed = True
+            if self.asr:
+                self.asr.setVocabulary( self.getParameter("Word list").split(';'), self.getParameter("Enable word spotting") )
+            self.memory.subscribeToEvent("WordRecognized", self.getName(), "onWordRecognized")
+            self.hasSubscribed = True
+        except RuntimeError, e:
+            self.mutex.release()
+            self.onUnload()
+            raise e
+        self.mutex.release()
+
+    def onInput_onStop(self):
+        if( self.bIsRunning ):
+            self.onUnload()
+            self.onStopped()
+
+    def onWordRecognized(self, key, value, message):
+        if(len(value) > 1 and value[1] >= self.getParameter("Confidence threshold (%)")/100.):
+            self.wordRecognized(value[0]) #~ activate output of the box
+        else:
+            self.onNothing()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Output name="wordRecognized" type="3" type_size="1" nature="2" inner="0" tooltip="Word recognized with a confidence higher than the threshold set in the box parameters." id="5" /><Output name="onNothing" type="1" type_size="1" nature="2" inner="0" tooltip="Nothing has been understood." id="6" /><Parameter name="Word list" inherits_from_parent="0" content_type="3" value="africa;europe;asia;australia;north america;south america;antartica" default_value="yes;no" custom_choice="0" tooltip="Try to recognize a word from a list of words set in the box parameters." id="7" /><Parameter name="Confidence threshold (%)" inherits_from_parent="0" content_type="1" value="30" default_value="30" min="0" max="100" tooltip="If the confidence associated with the word recognized is below this threshold, the robot will consider that it is not recognized." id="8" /><Parameter name="Visual expression" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Use the LEDs to show feedbacks from the robot during the recognition.&#x0A;&#x0A;For example:&#x0A;- Eyes leds get blue and turn when the speech recognition is launched.&#x0A;- They get yellow when the robot hears someone talking and analyses what it heard.&#x0A;- They flash in green when the robot understood and flash in red otherwise." id="9" /><Parameter name="Enable word spotting" inherits_from_parent="0" content_type="0" value="0" default_value="0" tooltip="If this option is not activated the robot will only understand exact expressions. If it is, he will spot the exact expressions even in the middle of a sentence.&#x0A;&#x0A;!!Warning!! This option is only available with the speech recognition module using Nuance (ie in Atom version of the robot)." id="10" /><Resource name="Speech recognition" type="Lock" timeout="0" /></Box><Link inputowner="8" indexofinput="2" outputowner="2" indexofoutput="6" /><Link inputowner="10" indexofinput="2" outputowner="2" indexofoutput="7" /><Link inputowner="12" indexofinput="2" outputowner="2" indexofoutput="8" /><Link inputowner="14" indexofinput="2" outputowner="2" indexofoutput="9" /><Link inputowner="6" indexofinput="2" outputowner="13" indexofoutput="6" /><Link inputowner="7" indexofinput="2" outputowner="6" indexofoutput="4" /><Link inputowner="5" indexofinput="2" outputowner="2" indexofoutput="5" /><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="2" indexofinput="2" outputowner="4" indexofoutput="5" /><Link inputowner="4" indexofinput="2" outputowner="1" indexofoutput="4" /><Link inputowner="3" indexofinput="2" outputowner="2" indexofoutput="4" /><Link inputowner="0" indexofinput="4" outputowner="3" indexofoutput="4" /><Link inputowner="0" indexofinput="4" outputowner="5" indexofoutput="4" /><Link inputowner="0" indexofinput="4" outputowner="8" indexofoutput="4" /><Link inputowner="0" indexofinput="4" outputowner="10" indexofoutput="4" /><Link inputowner="0" indexofinput="4" outputowner="12" indexofoutput="4" /><Link inputowner="0" indexofinput="4" outputowner="14" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>
